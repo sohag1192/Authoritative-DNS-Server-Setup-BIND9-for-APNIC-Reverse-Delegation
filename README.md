@@ -19,8 +19,8 @@ This repository/guide provides a complete setup for configuring an authoritative
 ## 🛠 Prerequisites
 - **OS:** Ubuntu 20.04 / 22.04 / 24.04 or Debian.
 - **Access:** `root` or `sudo` privileges.
-- **IP Block:** An assigned APNIC IPv4 block (e.g., `103.106.240.0/22`).
-- **Domain:** A registered domain for name servers (e.g., `asiannetworkbd.net`).
+- **IP Block:** An assigned APNIC IPv4 block (e.g., `203.0.112.0/22`).
+- **Domain:** A registered domain for name servers (e.g., `example.com`).
 
 ---
 
@@ -68,36 +68,21 @@ options {
 
 ### 2. Reverse DNS (PTR) Zones
 
-For a `/22` block (e.g., `103.106.240.0/22`), declare four `/24` zones in `/etc/bind/named.conf.local`:
+For a `/22` block (e.g., `203.0.112.0/22`), declare four `/24` zones in `/etc/bind/named.conf.local`:
 
 ```text
-zone "240.106.103.in-addr.arpa" { type master; file "/etc/bind/zones/db.103.106.240"; };
-zone "241.106.103.in-addr.arpa" { type master; file "/etc/bind/zones/db.103.106.241"; };
-zone "242.106.103.in-addr.arpa" { type master; file "/etc/bind/zones/db.103.106.242"; };
-zone "243.106.103.in-addr.arpa" { type master; file "/etc/bind/zones/db.103.106.243"; };
+zone "112.0.203.in-addr.arpa" { type master; file "/etc/bind/zones/db.203.0.112"; };
+zone "113.0.203.in-addr.arpa" { type master; file "/etc/bind/zones/db.203.0.113"; };
+zone "114.0.203.in-addr.arpa" { type master; file "/etc/bind/zones/db.203.0.114"; };
+zone "115.0.203.in-addr.arpa" { type master; file "/etc/bind/zones/db.203.0.115"; };
 
 ```
 
-Create the zone files in `/etc/bind/zones/` and define your PTR records.
-
-### 3. Forward DNS (A/NS) Zone
-
-To resolve your own name servers, create a forward zone.
-Add to `named.conf.local`:
-
-```text
-zone "asiannetworkbd.net" {
-    type master;
-    file "/etc/bind/zones/db.asiannetworkbd";
-};
-
-```
-
-Edit `/etc/bind/zones/db.asiannetworkbd`:
+Create the zone files in `/etc/bind/zones/` and define your PTR records. Example for `/etc/bind/zones/db.203.0.112`:
 
 ```text
 $TTL 86400
-@ IN SOA dns1.asiannetworkbd.net. admin.asiannetworkbd.net. (
+@ IN SOA dns1.example.com. admin.example.com. (
         2026100701 ; Serial
         3600       ; Refresh
         240        ; Retry
@@ -105,14 +90,48 @@ $TTL 86400
         86400 )    ; Minimum TTL
 
 ; Name Servers
-@ IN NS dns1.asiannetworkbd.net.
-@ IN NS dns2.asiannetworkbd.net.
+@ IN NS dns1.example.com.
+@ IN NS dns2.example.com.
+
+; PTR Records
+1  IN PTR gateway.example.com.
+10 IN PTR mail.example.com.
+
+```
+
+### 3. Forward DNS (A/NS) Zone
+
+To resolve your own name servers, create a forward zone.
+Add to `named.conf.local`:
+
+```text
+zone "example.com" {
+    type master;
+    file "/etc/bind/zones/db.example.com";
+};
+
+```
+
+Edit `/etc/bind/zones/db.example.com`:
+
+```text
+$TTL 86400
+@ IN SOA dns1.example.com. admin.example.com. (
+        2026100701 ; Serial
+        3600       ; Refresh
+        240        ; Retry
+        1209600    ; Expire
+        86400 )    ; Minimum TTL
+
+; Name Servers
+@ IN NS dns1.example.com.
+@ IN NS dns2.example.com.
 
 ; A Records
-@    IN A 103.106.243.111
-dns1 IN A 103.106.243.111
-dns2 IN A 103.106.243.111
-www  IN A 103.106.243.111
+@    IN A 198.51.100.10
+dns1 IN A 198.51.100.10
+dns2 IN A 198.51.100.11
+www  IN A 198.51.100.10
 
 ```
 
@@ -145,8 +164,8 @@ sudo named-checkconf
 **2. Check reverse and forward zone syntax:**
 
 ```bash
-sudo named-checkzone 240.106.103.in-addr.arpa /etc/bind/zones/db.103.106.240
-sudo named-checkzone asiannetworkbd.net /etc/bind/zones/db.asiannetworkbd
+sudo named-checkzone 112.0.203.in-addr.arpa /etc/bind/zones/db.203.0.112
+sudo named-checkzone example.com /etc/bind/zones/db.example.com
 
 ```
 
@@ -162,8 +181,8 @@ sudo systemctl status named
 **4. Local Query Test:**
 
 ```bash
-dig @localhost -x 103.106.240.1
-dig @localhost dns1.asiannetworkbd.net
+dig @localhost -x 203.0.112.1
+dig @localhost dns1.example.com
 
 ```
 
@@ -176,15 +195,15 @@ Once the server is running and returning `NOERROR` for local queries:
 1. Log in to [MyAPNIC](https://myapnic.net/).
 2. Navigate to **Resource Manager > Reverse DNS Delegations > Add Reverse Delegations**.
 3. Since APNIC accepts `/24` boundaries, submit 4 separate requests for your `/22` block:
-* `103.106.240.0/24`
-* `103.106.241.0/24`
-* `103.106.242.0/24`
-* `103.106.243.0/24`
+* `203.0.112.0/24`
+* `203.0.113.0/24`
+* `203.0.114.0/24`
+* `203.0.115.0/24`
 
 
-4. Set **Name Server 1** to `dns1.asiannetworkbd.net` and **Name Server 2** to `dns2.asiannetworkbd.net`.
+4. Set **Name Server 1** to `dns1.example.com` and **Name Server 2** to `dns2.example.com`.
 5. Submit. Wait up to 2 hours for `ns.apnic.net` to reload.
-6. Verify globally: `dig +trace -x 103.106.240.1`
+6. Verify globally: `dig +trace -x 203.0.112.1`
 
 ---
 
