@@ -1,0 +1,30 @@
+// /etc/bind/named.conf.local
+// Production Reverse Zone Declarations for 103.106.240.0/22 (APNIC /24 boundaries)
+
+zone "240.106.103.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.240.106.103.in-addr.arpa";
+    allow-update { none; };
+    allow-query { any; };
+};
+
+zone "241.106.103.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.241.106.103.in-addr.arpa";
+    allow-update { none; };
+    allow-query { any; };
+};
+
+zone "242.106.103.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.242.106.103.in-addr.arpa";
+    allow-update { none; };
+    allow-query { any; };
+};
+
+zone "243.106.103.in-addr.arpa" {
+    type master;
+    file "/etc/bind/zones/db.243.106.103.in-addr.arpa";
+    allow-update { none; };
+    allow-query { any; };
+};

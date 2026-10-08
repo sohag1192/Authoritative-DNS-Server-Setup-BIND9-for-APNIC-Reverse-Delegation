@@ -1,0 +1,26 @@
+// /etc/bind/named.conf.options
+// Production Authoritative DNS Configuration for APNIC Reverse Delegation
+
+options {
+    directory "/var/cache/bind";
+
+    // =========================================================================
+    // SECURITY HARDENING: Authoritative-Only DNS Server
+    // =========================================================================
+    // Disable recursion to prevent Open Resolver amplification DDoS attacks.
+    recursion no;
+    allow-query-cache { none; };
+
+    // Prevent unauthorized zone transfers (AXFR/IXFR)
+    allow-transfer { none; };
+
+    // Allow public queries so APNIC validators and recursive resolvers can query PTRs
+    allow-query { any; };
+
+    // Standard DNSSEC validation
+    dnssec-validation auto;
+
+    // Listen on both IPv4 and IPv6 interfaces
+    listen-on { any; };
+    listen-on-v6 { any; };
+};

@@ -1,0 +1,22 @@
+; ==============================================================================
+; Reverse Zone File Template for BIND9
+; Zone: 240.106.103.in-addr.arpa (103.106.240.0/24)
+; ==============================================================================
+
+$TTL 86400
+@   IN  SOA dns1.asiannetworkbd.net. root.asiannetworkbd.net. (
+            2026100703   ; Serial: YYYYMMDDNN (Must be incremented on changes)
+            3600         ; Refresh (1 hour)
+            240          ; Retry (4 minutes - RFC/APNIC recommended)
+            1209600      ; Expire (2 weeks)
+            86400 )      ; Minimum / Negative Cache TTL
+;
+; Authoritative Name Servers (Must match MyAPNIC NS delegation exactly)
+@   IN  NS  dns1.asiannetworkbd.net.
+@   IN  NS  dns2.asiannetworkbd.net.
+
+;
+; Reverse PTR Records:
+; Uses BIND $GENERATE directive to automatically map octets 0 through 255.
+; NOTE: Target domain FQDN must end with a trailing dot (.)!
+$GENERATE 0-255 $ PTR 103-106-240-$-asiannetworkbd.net.
